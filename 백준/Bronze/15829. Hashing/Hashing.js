@@ -5,9 +5,9 @@ const input = fs.readFileSync(filePath, "utf8").toString().trim().split("\n");
 
 const charArr = input[1].split("");
 
-let sum = 0;
+let sum = 0n;
 charArr.forEach((char, idx) => {
-  sum += (char.charCodeAt() - 96) * 31 ** idx;
+  sum += BigInt(char.charCodeAt() - 96) * 31n ** BigInt(idx);
 });
 
-console.log(sum);
+console.log(String(sum % 1234567891n));
