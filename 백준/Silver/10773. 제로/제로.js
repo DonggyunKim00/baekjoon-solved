@@ -1,22 +1,26 @@
-const fs = require("fs");
+const fs = require('fs');
 
-const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
+const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
 const input = fs
-  .readFileSync(filePath, "utf8")
+  .readFileSync(filePath, 'utf8')
   .toString()
   .trim()
-  .split("\n")
-  .slice(1)
-  .map((item) => Number(item));
+  .split('\n')
+  .map(Number);
+input.shift();
 
-const answerArr = [];
+const solution = (input) => {
+  const stack = [];
 
-input.forEach((num) => {
-  if (num === 0) {
-    answerArr.pop();
-  } else {
-    answerArr.push(num);
-  }
-});
+  input.forEach((num) => {
+    if (num) {
+      stack.push(num);
+    } else {
+      stack.pop();
+    }
+  });
 
-console.log(answerArr.reduce((acc, cur) => acc + cur, 0).toString());
+  return stack;
+};
+
+console.log(solution(input).reduce((acc, cur) => acc + cur, 0));
