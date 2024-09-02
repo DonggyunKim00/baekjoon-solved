@@ -1,43 +1,39 @@
-const fs = require("fs");
+const fs = require('fs');
 
-const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
+const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
 const input = fs
-  .readFileSync(filePath, "utf8")
+  .readFileSync(filePath, 'utf8')
   .toString()
   .trim()
-  .split("\n")
-  .map((item) => Number(item));
+  .split('\n')
+  .map(Number);
 
-const N = input.splice(0, 1)[0];
+const n = input.shift();
+const solution = (n, input) => {
+  const arr = Array.from({ length: n }, (_, idx) => idx + 1).reverse();
+  const stack = [];
+  const answer = [];
 
-const list = Array.from({ length: N }, (_, idx) => idx + 1);
-const stack = [];
+  input.forEach((value) => {
+    const idx = stack.indexOf(value);
 
-const answer = [];
-for (const i of input) {
-  if (stack.findIndex((num) => num === i) === -1) {
-    let shiftNum;
-    if (list.findIndex((num) => num === i) !== -1) {
-      while (shiftNum !== i) {
-        shiftNum = list.shift();
-        stack.push(shiftNum);
-        answer.push("+");
+    if (idx === -1) {
+      let popValue = 0;
+      while (arr.length && value !== popValue) {
+        popValue = arr.pop();
+        stack.push(popValue);
+        answer.push('+');
       }
       stack.pop();
-      answer.push("-");
+      answer.push('-');
     } else {
-      answer.push("NO");
-      break;
+      if (stack[stack.length - 1] !== value) return;
+      stack.pop();
+      answer.push('-');
     }
-  }
-  // i 가 있음
-  else {
-    let popNum;
-    while (popNum !== i) {
-      popNum = stack.pop();
-      answer.push("-");
-    }
-  }
-}
+  });
 
-console.log(answer[answer.length - 1] === "NO" ? "NO" : answer.join("\n"));
+  return stack.length ? 'NO' : answer.join('\n');
+};
+
+console.log(solution(n, input));
