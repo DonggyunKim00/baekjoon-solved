@@ -1,22 +1,27 @@
-const fs = require("fs");
+const fs = require('fs');
 
-const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
-const input = fs.readFileSync(filePath, "utf8").toString().trim().split("\n");
-
-const newInput = input.slice(1).map((item) => item.split(" "));
+const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
+const input = fs
+  .readFileSync(filePath, 'utf8')
+  .toString()
+  .trim()
+  .split('\n')
+  .map((item) => item.split(' '));
 
 class Queue {
   constructor() {
     this.list = [];
   }
 
-  push(x) {
-    this.list.push(Number(x));
+  push(value) {
+    this.list.push(value);
   }
 
   pop() {
-    const shiftNum = this.list.shift();
-    return shiftNum ? shiftNum : -1;
+    if (!this.list.length) return -1;
+
+    const value = this.list.shift();
+    return value;
   }
 
   size() {
@@ -28,24 +33,48 @@ class Queue {
   }
 
   front() {
-    return this.list[0] ? this.list[0] : -1;
+    if (!this.size()) return -1;
+
+    return this.list[0];
   }
 
   back() {
-    return this.list[0] ? this.list[this.list.length - 1] : -1;
+    if (!this.size()) return -1;
+
+    return this.list[this.list.length - 1];
   }
 }
 
-const queue = new Queue();
-const answer = [];
-newInput.forEach((item) => {
-  const [method, num] = item;
-  if (method === "push") queue.push(num);
-  else if (method === "pop") answer.push(queue.pop());
-  else if (method === "size") answer.push(queue.size());
-  else if (method === "empty") answer.push(queue.empty());
-  else if (method === "front") answer.push(queue.front());
-  else if (method === "back") answer.push(queue.back());
-});
+const [N, ...operate] = input;
+const solution = (n, operate) => {
+  const queue = new Queue();
+  const answer = [];
 
-console.log(answer.join("\n"));
+  operate.forEach(([method, value]) => {
+    switch (method) {
+      case 'push':
+        queue.push(Number(value));
+        break;
+      case 'pop':
+        answer.push(queue.pop());
+        break;
+      case 'size':
+        answer.push(queue.size());
+        break;
+      case 'empty':
+        answer.push(queue.empty());
+        break;
+      case 'front':
+        answer.push(queue.front());
+        break;
+      case 'back':
+        answer.push(queue.back());
+        break;
+    }
+  });
+
+  return answer;
+};
+
+const answer = solution(Number(N[0]), operate).join('\n');
+console.log(answer);
