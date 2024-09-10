@@ -1,60 +1,98 @@
-const fs = require("fs");
+const fs = require('fs');
 
-const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
-const input = fs.readFileSync(filePath, "utf8").toString().trim().split("\n");
-
-const newInput = input.slice(1).map((item) => item.split(" "));
+const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
+const input = fs
+  .readFileSync(filePath, 'utf8')
+  .toString()
+  .trim()
+  .split('\n')
+  .map((item) => item.split(' '));
 
 class Deque {
-  constructor() {
-    this.list = [];
+  constructor(N) {
+    this.list = {};
+    this.head = N;
+    this.tail = N + 1;
   }
 
-  push_front(x) {
-    this.list.splice(0, 0, Number(x));
+  push_front(value) {
+    this.list[this.head] = value;
+    this.head -= 1;
   }
-  push_back(x) {
-    this.list.push(Number(x));
+
+  push_back(value) {
+    this.list[this.tail] = value;
+    this.tail += 1;
   }
 
   pop_front() {
-    const shiftNum = this.list.shift();
-    return shiftNum ? shiftNum : -1;
+    if (this.head + 1 >= this.tail) return -1;
+    const popValue = this.list[this.head + 1];
+    this.head += 1;
+    return popValue;
   }
+
   pop_back() {
-    const popNum = this.list.pop();
-    return popNum ? popNum : -1;
+    if (this.head + 1 >= this.tail) return -1;
+    const popValue = this.list[this.tail - 1];
+    this.tail -= 1;
+    return popValue;
   }
 
   size() {
-    return this.list.length;
+    return this.tail - this.head - 1;
   }
 
   empty() {
-    return this.list.length ? 0 : 1;
+    return this.size() ? 0 : 1;
   }
 
   front() {
-    return this.list[0] ? this.list[0] : -1;
+    if (!this.size()) return -1;
+    return this.list[this.head + 1];
   }
 
   back() {
-    return this.list[0] ? this.list[this.list.length - 1] : -1;
+    if (!this.size()) return -1;
+    return this.list[this.tail - 1];
   }
 }
 
-const deque = new Deque();
-const answer = [];
-newInput.forEach((item) => {
-  const [method, num] = item;
-  if (method === "push_front") deque.push_front(num);
-  else if (method === "push_back") deque.push_back(num);
-  else if (method === "pop_front") answer.push(deque.pop_front());
-  else if (method === "pop_back") answer.push(deque.pop_back());
-  else if (method === "size") answer.push(deque.size());
-  else if (method === "empty") answer.push(deque.empty());
-  else if (method === "front") answer.push(deque.front());
-  else if (method === "back") answer.push(deque.back());
-});
+const solution = (N, operate) => {
+  const deque = new Deque(N);
+  const answer = [];
 
-console.log(answer.join("\n"));
+  operate.forEach(([method, value]) => {
+    switch (method) {
+      case 'push_front':
+        deque.push_front(Number(value));
+        break;
+      case 'push_back':
+        deque.push_back(Number(value));
+        break;
+      case 'pop_front':
+        answer.push(deque.pop_front());
+        break;
+      case 'pop_back':
+        answer.push(deque.pop_back());
+        break;
+      case 'size':
+        answer.push(deque.size());
+        break;
+      case 'empty':
+        answer.push(deque.empty());
+        break;
+      case 'front':
+        answer.push(deque.front());
+        break;
+      case 'back':
+        answer.push(deque.back());
+        break;
+    }
+  });
+  return answer;
+};
+
+const [N, ...inputs] = input;
+const answer = solution(Number(N[0]), inputs).join('\n');
+console.log(answer);
