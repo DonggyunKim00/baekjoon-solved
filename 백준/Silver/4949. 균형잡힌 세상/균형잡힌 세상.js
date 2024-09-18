@@ -1,34 +1,52 @@
-const fs = require("fs");
+const fs = require('fs');
 
-const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
-const input = fs.readFileSync(filePath, "utf8").toString().trim().split("\n");
+const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
+const input = fs
+  .readFileSync(filePath, 'utf8')
+  .toString()
+  .trim()
+  .split('\n')
+  .map((item) => item.split(''));
 
-input.splice(input.length - 1, input.length);
+const small = ['(', ')'];
+const big = ['[', ']'];
 
-const charArr = [];
-input.forEach((item) => {
-  const innerArr = [];
-  item.split("").forEach((char) => {
-    if (char === "(" || char === "[") innerArr.push(char);
-    else if (char === ")" || char === "]") innerArr.push(char);
-  });
-  charArr.push(innerArr);
-});
+const solution = (input) => {
+  const answer = [];
 
-charArr.forEach((arr) => {
-  let idx = 0;
-  while (idx < arr.length) {
-    if (arr[idx] + arr[idx + 1] === "[]" || arr[idx] + arr[idx + 1] === "()") {
-      arr.splice(idx, 2);
-      idx = 0;
-    } else {
-      idx += 1;
+  input.forEach((string) => {
+    const stack = [];
+
+    for (let i = 0; i < string.length; i++) {
+      const char = string[i];
+
+      if (char === small[0] || char === big[0]) {
+        stack.push(char);
+      }
+
+      if (char === small[1]) {
+        if (stack[stack.length - 1] === small[0]) stack.pop();
+        else {
+          stack.push(char);
+          break;
+        }
+      }
+
+      if (char === big[1]) {
+        if (stack[stack.length - 1] === big[0]) stack.pop();
+        else {
+          stack.push(char);
+          break;
+        }
+      }
     }
 
-    if (arr.length === 0) break;
-  }
-});
+    answer.push(stack.length ? 'no' : 'yes');
+  });
 
-console.log(
-  charArr.map((item) => (item.length === 0 ? "yes" : "no")).join("\n")
-);
+  return answer;
+};
+
+input.pop();
+const answer = solution(input).join('\n');
+console.log(answer);
