@@ -1,24 +1,32 @@
-const fs = require("fs");
+const fs = require('fs');
 
-const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
-const input = fs.readFileSync(filePath, "utf8").toString().trim().split("\n");
+const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
+const input = fs.readFileSync(filePath, 'utf8').toString().trim().split('\n');
 
-const sliceInput = input.slice(1).map((item) => item.split(""));
+const solution = (T, input) => {
+  const answer = [];
 
-const answer = [];
-sliceInput.forEach((string) => {
-  let i = 0;
-  while (string.length > 1) {
-    if (string[0] === "(") {
-      if (string[i] !== string[i + 1]) {
-        string.splice(i, 2);
-        i = 0;
-      } else i++;
-    } else {
-      string.splice(string.length - 1);
+  for (let i = 0; i < T; i++) {
+    const str = input[i].split('');
+    const stack = [];
+
+    for (let j = 0; j < str.length; j++) {
+      const v = str[j];
+      if (!stack.length) {
+        stack.push(v);
+        continue;
+      }
+
+      if (stack[stack.length - 1] === '(' && v === ')') stack.pop();
+      else stack.push(v);
     }
-  }
-  answer.push(string.length >= 1 ? "NO" : "YES");
-});
 
-console.log(answer.join("\n"));
+    stack.length ? answer.push('NO') : answer.push('YES');
+  }
+
+  return answer;
+};
+
+const [T, ...string] = input;
+const answer = solution(Number(T), string).join('\n');
+console.log(answer);
