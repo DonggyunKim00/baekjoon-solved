@@ -4,12 +4,12 @@ const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
 const input = fs.readFileSync(filePath, 'utf8').toString().trim().split('\n');
 
 const bfs = (L, R, C, graph) => {
-  // console.log(L, R, C, graph);
   const [dx, dy, dz] = [
     [1, -1, 0, 0, 0, 0],
     [0, 0, 1, -1, 0, 0],
     [0, 0, 0, 0, 1, -1],
   ];
+
   const queue = [];
 
   for (let i = 0; i < L; i++) {
@@ -36,13 +36,16 @@ const bfs = (L, R, C, graph) => {
       if (graph[mx][my][mz] === '#' || typeof graph[mx][my][mz] === 'number')
         continue;
 
+      // 이동할 수 있는 조건
       if (graph[mx][my][mz] === '.') {
         graph[mx][my][mz] = count + 1;
         queue.push([mx, my, mz, count + 1]);
       }
 
+      // 탈출 통로를 찾으면 while문 종료
       if (graph[mx][my][mz] === 'E') {
         time = count + 1;
+        break;
       }
     }
   }
