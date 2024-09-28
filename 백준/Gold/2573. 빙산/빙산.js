@@ -7,82 +7,72 @@ const input = fs
   .trim()
   .split('\n')
   .map((item) => item.split(' ').map(Number));
+
 const [dx, dy] = [
   [1, -1, 0, 0],
   [0, 0, 1, -1],
 ];
 
-// 빙산을 녹이는 로직 최적화: 빙산 위치만 탐색
-const meltIcebergs = (N, M, graph) => {
-  const meltQueue = [];
-  const meltingPoints = Array.from({ length: N }, () =>
-    Array(M).fill(0)
-  );
+const melt_bfs = (N, M, graph) => {
+  const queue = [];
 
-  // 빙산이 있는 위치만 처리
   for (let i = 0; i < N; i++) {
     for (let j = 0; j < M; j++) {
-      if (graph[i][j] > 0) {
-        let seaCount = 0;
+      // 빙산일때만 아래 로직 실행
+      if (!graph[i][j]) continue;
 
-        // 주변의 바다(0인 부분) 카운트
-        for (let d = 0; d < 4; d++) {
-          const nx = i + dx[d];
-          const ny = j + dy[d];
+      let seaCount = 0;
+      // 주변 바다 카운트
+      for (let dir = 0; dir < 4; dir++) {
+        const mx = i + dx[dir];
+        const my = j + dy[dir];
+        if (mx < 0 && my < 0 && mx >= N && my >= M) continue;
 
-          if (nx >= 0 && ny >= 0 && nx < N && ny < M && graph[nx][ny] === 0) {
-            seaCount++;
-          }
-        }
-
-        // 녹일 양을 기록
-        if (seaCount > 0) {
-          meltQueue.push([i, j, seaCount]);
-        }
+        // 바다일때 seaCount 1증가
+        if (!graph[mx][my]) seaCount += 1;
       }
+
+      // 녹일 양을 기록
+      if (seaCount > 0) queue.push([i, j, seaCount]);
     }
   }
 
-  // 빙산을 녹이는 과정
-  meltQueue.forEach(([x, y, melt]) => {
+  // graph에 녹인 양만큼 빼고 할당하기, 원래 바다였다면 그대로 0 할당
+  queue.forEach(([x, y, melt]) => {
     graph[x][y] = Math.max(graph[x][y] - melt, 0);
   });
 };
 
-// 빙산의 구역을 세는 BFS 함수
-const countIcebergs = (N, M, graph, visited) => {
+const count_bfs = (N, M, graph, visited) => {
   let regionsCount = 0;
 
-  const bfs = (sx, sy) => {
-    const queue = [[sx, sy]];
-    visited[sx][sy] = true;
+  const bfs = ([i, j]) => {
+    const queue = [[i, j]];
+    visited[i][j] = 1;
 
-    while (queue.length) {
-      const [x, y] = queue.shift();
+    let head = 0;
+    while (queue.length > head) {
+      const [x, y] = queue[head++];
 
-      for (let d = 0; d < 4; d++) {
-        const nx = x + dx[d];
-        const ny = y + dy[d];
+      for (let dir = 0; dir < 4; dir++) {
+        const mx = x + dx[dir];
+        const my = y + dy[dir];
+        if (mx < 0 || my < 0 || mx >= N || my >= M) continue;
 
-        if (
-          nx >= 0 &&
-          ny >= 0 &&
-          nx < N &&
-          ny < M &&
-          graph[nx][ny] > 0 &&
-          !visited[nx][ny]
-        ) {
-          queue.push([nx, ny]);
-          visited[nx][ny] = true;
+        // 빙산이 있고, 방문한적이 없다면 이동
+        if (graph[mx][my] && !visited[mx][my]) {
+          queue.push([mx, my]);
+          visited[mx][my] = 1;
         }
       }
     }
   };
 
+  // bfs가 호출된 횟수가 구역의 개수임
   for (let i = 0; i < N; i++) {
     for (let j = 0; j < M; j++) {
       if (graph[i][j] > 0 && !visited[i][j]) {
-        bfs(i, j);
+        bfs([i, j]);
         regionsCount++;
       }
     }
@@ -95,23 +85,14 @@ const solution = (N, M, graph) => {
   let time = 0;
 
   while (true) {
-    const visited = Array.from({ length: N }, () => Array(M).fill(false));
+    const visited = Array.from({ length: N }, () => Array(M).fill(0));
 
-    // 빙산 녹이기
-    meltIcebergs(N, M, graph);
+    melt_bfs(N, M, graph);
+    const regionsCount = count_bfs(N, M, graph, visited);
 
-    // 빙산 구역 카운트
-    const regionsCount = countIcebergs(N, M, graph, visited);
-
-    // 빙산이 다 녹았는지 체크
-    if (regionsCount === 0) {
-      return 0;
-    }
-
-    // 두 개 이상의 구역으로 분리되면 시간 리턴
-    if (regionsCount >= 2) {
-      return time + 1;
-    }
+    // regionsCount가 0 이라면 빙산이 전부 녹은 것
+    if (!regionsCount) return 0;
+    if (regionsCount >= 2) return time + 1;
 
     time++;
   }
