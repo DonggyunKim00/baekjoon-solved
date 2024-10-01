@@ -4,6 +4,7 @@ const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
 const input = fs.readFileSync(filePath, 'utf8').toString().trim();
 
 const UNDERBAR = '____';
+const START_TEXT = '어느 한 컴퓨터공학과 학생이 유명한 교수님을 찾아가 물었다.';
 const TEXT = [
   '"재귀함수가 뭔가요?"',
   '"잘 들어보게. 옛날옛날 한 산 꼭대기에 이세상 모든 지식을 통달한 선인이 있었어.',
@@ -15,6 +16,7 @@ const END_TEXT = [
   '"재귀함수는 자기 자신을 호출하는 함수라네"',
   '라고 답변하였지.',
 ];
+const FINISH_TEXT = ['라고 답변하였지.'];
 
 const addUnderbar = (strArr, value) => {
   for (let i = 0; i < value; i++) {
@@ -31,14 +33,15 @@ const solution = (input, count) => {
     return;
   }
 
-  if (count === 0) {
-    console.log('어느 한 컴퓨터공학과 학생이 유명한 교수님을 찾아가 물었다.');
-  }
+  // 첫 문장 출력
+  if (!count) console.log(START_TEXT);
 
+  // 본문 출력
   console.log(addUnderbar(TEXT, count));
   solution(input, count + 1);
 
-  return console.log(addUnderbar(['라고 답변하였지.'], count));
+  // 마무리 출력
+  return console.log(addUnderbar(FINISH_TEXT, count));
 };
 
 solution(Number(input), 0);
