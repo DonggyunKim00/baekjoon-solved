@@ -1,98 +1,37 @@
 const fs = require('fs');
 
 const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
-const input = fs
-  .readFileSync(filePath, 'utf8')
-  .toString()
-  .trim()
-  .split('\n')
-  .map((item, idx) => {
-    if (idx) {
-      return item.split(' ').map(Number);
-    } else {
-      return Number(item);
-    }
-  });
+const input = fs.readFileSync(filePath, 'utf8').toString().trim().split('\n');
 
-const N = input.shift();
-const ans = {
-  white: 0,
-  blue: 0,
+const solution = (N, graph) => {
+  let answer = [0, 0];
+
+  const recursion = (x, y, size) => {
+    let count = 0;
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        if (graph[y][x] === graph[y + i][x + j]) {
+          count += 1;
+        } else break;
+      }
+    }
+
+    if (size * size === count) return (answer[graph[y][x]] += 1);
+
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 2; j++) {
+        const newSize = size / 2;
+        recursion(x + i * newSize, y + j * newSize, newSize);
+      }
+    }
+  };
+
+  recursion(0, 0, N);
+
+  return answer;
 };
 
-const dnc = (size, matrix) => {
-  if (size > 1) {
-    if (matrix[0][0] && matrix.flat().every((item) => item === matrix[0][0])) {
-      ans.blue += 1;
-      return;
-    } else if (
-      !matrix[0][0] &&
-      matrix.flat().every((item) => item === matrix[0][0])
-    ) {
-      ans.white += 1;
-      return;
-    }
-
-    const newsize = size / 2;
-    const matrix1 = [];
-    const matrix2 = [];
-    const matrix3 = [];
-    const matrix4 = [];
-
-    // 1사분면 matrix 만들기
-    for (let col = 0; col < newsize; col++) {
-      const innerArr = [];
-
-      for (let row = 0; row < newsize; row++) {
-        innerArr.push(matrix[col][row]);
-      }
-      matrix1.push(innerArr);
-    }
-
-    // 2사분면 matrix 만들기
-    for (let col = 0; col < newsize; col++) {
-      const innerArr = [];
-      for (let row = newsize; row < newsize * 2; row++) {
-        innerArr.push(matrix[col][row]);
-      }
-      matrix2.push(innerArr);
-    }
-
-    // 3사분면 matrix 만들기
-    for (let col = newsize; col < newsize * 2; col++) {
-      const innerArr = [];
-      for (let row = 0; row < newsize; row++) {
-        innerArr.push(matrix[col][row]);
-      }
-      matrix3.push(innerArr);
-    }
-
-    // 4사분면 matrix 만들기
-    for (let col = newsize; col < newsize * 2; col++) {
-      const innerArr = [];
-
-      for (let row = newsize; row < newsize * 2; row++) {
-        innerArr.push(matrix[col][row]);
-      }
-      matrix4.push(innerArr);
-    }
-
-    dnc(newsize, matrix1);
-    dnc(newsize, matrix2);
-    dnc(newsize, matrix3);
-    dnc(newsize, matrix4);
-  } else {
-    if (matrix[0][0]) {
-      ans.blue += 1;
-      return;
-    } else {
-      ans.white += 1;
-      return;
-    }
-  }
-};
-
-dnc(N, input);
-
-console.log(ans.white);
-console.log(ans.blue);
+const N = Number(input.shift());
+const graph = input.map((item) => item.split(' ').map(Number));
+const answer = solution(N, graph).join('\n');
+console.log(answer);
