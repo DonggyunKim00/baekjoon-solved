@@ -8,19 +8,24 @@ const input = fs
   .split(' ')
   .map(Number);
 
-const dfs = (N, M, result = []) => {
-  if (result.length === M) {
-    console.log(result.join(' '));
-    return;
-  }
-
-  for (let i = 1; i <= N; i++) {
-    if (!result.includes(i)) dfs(N, M, [...result, i]);
-  }
-};
-
 const solution = (N, M) => {
-  dfs(N, M);
+  let visited = Array(N).fill(false);
+  let arr = Array.from(M).fill(0);
+
+  const recursion = (k) => {
+    if (k === M) return console.log(arr.join(' '));
+
+    for (let i = 0; i < N; i++) {
+      if (!visited[i]) {
+        arr[k] = i + 1;
+        visited[i] = true;
+        recursion(k + 1);
+        visited[i] = false;
+      }
+    }
+  };
+
+  recursion(0);
 };
 
 const [N, M] = input;
