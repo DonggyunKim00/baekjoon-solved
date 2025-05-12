@@ -1,46 +1,24 @@
 const fs = require('fs');
-
 const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
 const input = fs.readFileSync(filePath, 'utf8').toString().trim().split('\n');
-
-class Queue {
-  constructor() {
-    this.front = 0;
-    this.rear = 0;
-    this.list = {};
-  }
-
-  push(value) {
-    this.list[this.rear] = value;
-    this.rear += 1;
-  }
-
-  shift() {
-    const prev = this.list[this.front];
-    delete this.list[this.front];
-    this.front += 1;
-    return prev;
-  }
-
-  isEmpty() {
-    return this.front === this.rear ? 1 : 0;
-  }
-}
 
 const [dx, dy] = [
   [1, -1, 0, 0],
   [0, 0, 1, -1],
 ];
+
 const bfs = (w, h, graph) => {
-  const queue = new Queue();
-  let f_visited = Array.from({ length: h }, () => Array(w).fill(0));
-  let p_visited = Array.from({ length: h }, () => Array(w).fill(0));
+  const F_visited = Array.from({ length: h }, () => Array(w).fill(0));
+  const S_visited = Array.from({ length: h }, () => Array(w).fill(0));
+
+  let head = 0;
+  const queue = [];
 
   for (let i = 0; i < h; i++) {
     for (let j = 0; j < w; j++) {
       if (graph[i][j] === '*') {
-        queue.push([i, j, '*', 0]);
-        f_visited[i][j] = 1;
+        queue.push([i, j, 'F']);
+        F_visited[i][j] = 1;
       }
     }
   }
@@ -48,59 +26,62 @@ const bfs = (w, h, graph) => {
   for (let i = 0; i < h; i++) {
     for (let j = 0; j < w; j++) {
       if (graph[i][j] === '@') {
-        queue.push([i, j, '@', 0]);
-        p_visited[i][j] = 1;
+        queue.push([i, j, 'S']);
+        S_visited[i][j] = 1;
       }
     }
   }
 
-  while (!queue.isEmpty()) {
-    const [prev_x, prev_y, prev_v, count] = queue.shift();
+  while (queue.length > head) {
+    const [x, y, type] = queue[head++];
 
     for (let dir = 0; dir < 4; dir++) {
-      const mx = prev_x + dx[dir];
-      const my = prev_y + dy[dir];
-      if (mx < 0 || my < 0 || mx >= h || my >= w) {
-        if (prev_v === '@') return count + 1;
-        continue;
+      const mx = x + dx[dir];
+      const my = y + dy[dir];
+
+      // 상근이가 탈출에 성공
+      if (type === 'S' && (mx < 0 || my < 0 || mx >= h || my >= w)) {
+        return S_visited[x][y];
       }
+
+      if (mx < 0 || my < 0 || mx >= h || my >= w) continue;
       if (graph[mx][my] === '#') continue;
 
-      if (prev_v === '*' && !f_visited[mx][my]) {
-        queue.push([mx, my, '*', count + 1]);
-        f_visited[mx][my] = 1;
+      if (type === 'F') {
+        if (!F_visited[mx][my]) {
+          F_visited[mx][my] = F_visited[x][y] + 1;
+          queue.push([mx, my, 'F']);
+        }
       }
 
-      if (prev_v === '@' && graph[mx][my] === '.' && !p_visited[mx][my]) {
-        queue.push([mx, my, '@', count + 1]);
-        p_visited[mx][my] = 1;
+      if (type === 'S') {
+        if (
+          !S_visited[mx][my] &&
+          graph[mx][my] === '.' &&
+          (F_visited[mx][my] === 0 || S_visited[x][y] + 1 < F_visited[mx][my])
+        ) {
+          S_visited[mx][my] = S_visited[x][y] + 1;
+          queue.push([mx, my, 'S']);
+        }
       }
-
-      graph[mx][my] = prev_v;
     }
   }
 
   return 'IMPOSSIBLE';
 };
 
-const solution = (N, inputs) => {
-  const answer = [];
+const T = Number(input.shift());
+
+const solution = () => {
   let idx = 0;
-
-  for (let i = 0; i < N; i++) {
-    const [w, h] = inputs[idx].split(' ').map(Number);
-    const graph = inputs
-      .slice(idx + 1, idx + h + 1)
-      .map((item) => item.split(''));
-
-    answer.push(bfs(w, h, graph));
-
+  for (let i = 0; i < T; i++) {
+    const [w, h] = input[idx].split(' ').map(Number);
+    const graph = input
+      .slice(idx + 1, idx + 1 + h)
+      .map((line) => line.split(''));
     idx += h + 1;
+    console.log(bfs(w, h, graph));
   }
-
-  return answer;
 };
 
-const [N, ...inputs] = input;
-const answer = solution(N, inputs).join('\n');
-console.log(answer);
+solution();
