@@ -1,52 +1,51 @@
 const fs = require('fs');
-
 const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
-const input = fs
-  .readFileSync(filePath, 'utf8')
-  .toString()
-  .trim()
-  .split('\n')
-  .map((item) => item.split(' ').map(Number));
+const input = fs.readFileSync(filePath, 'utf8').toString().trim().split('\n');
 
 const [dx, dy] = [
-  [1, 2, 2, 1, -1, -2, -2, -1],
   [-2, -1, 1, 2, 2, 1, -1, -2],
+  [-1, -2, -2, -1, 1, 2, 2, 1],
 ];
 
-const bfs = (length, start, end) => {
-  let visited = Array.from({ length }, () => Array.from({ length }, () => -1));
+const bfs = (l, start, goal) => {
+  const visited = Array.from({ length: l }, () => Array(l).fill(0));
+  const [start_x, start_y] = start;
+  const [goal_x, goal_y] = goal;
 
-  let curr = start;
-  const queue = [curr];
-  visited[curr[0]][curr[1]] = 0;
+  const queue = [[start_x, start_y]];
+  visited[start_x][start_y] = 1;
 
   while (queue.length) {
-    const [prev_x, prev_y] = queue.shift();
-    for (let dir = 0; dir < 8; dir++) {
-      const mx = prev_x + dx[dir];
-      const my = prev_y + dy[dir];
+    const [x, y] = queue.shift();
 
-      if (mx < 0 || mx >= length || my < 0 || my >= length) continue;
-      if (visited[mx][my] !== -1) continue;
+    if (x === goal_x && y === goal_y) return visited[x][y] - 1;
+
+    for (let dir = 0; dir < 8; dir++) {
+      const mx = x + dx[dir];
+      const my = y + dy[dir];
+
+      if (mx < 0 || my < 0 || mx >= l || my >= l) continue;
+      if (visited[mx][my]) continue;
 
       queue.push([mx, my]);
-      curr = [mx, my];
-      visited[mx][my] = visited[prev_x][prev_y] + 1;
+      visited[mx][my] = visited[x][y] + 1;
     }
   }
-
-  return visited[end[0]][end[1]];
 };
 
-const solution = (N, input) => {
-  const answer = [];
-  for (let i = 0; i < N; i++) {
-    const [l, start, end] = input.slice(3 * i, 3 * i + 3);
-    answer.push(bfs(l[0], start, end));
+const solution = () => {
+  const T = Number(input.shift());
+
+  let idx = 0;
+  for (let i = 0; i < T; i++) {
+    const [l, start, goal] = input.slice(idx, idx + 3);
+    const start_pos = start.split(' ').map(Number);
+    const goal_pos = goal.split(' ').map(Number);
+
+    console.log(bfs(Number(l), start_pos, goal_pos));
+
+    idx += 3;
   }
-  return answer;
 };
 
-const N = input.shift();
-const answer = solution(Number(N), input).join('\n');
-console.log(answer);
+solution();
