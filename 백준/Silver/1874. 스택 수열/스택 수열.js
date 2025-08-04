@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
+const filePath = process.platform === 'linux' ? '/dev/stdin' : './input.txt';
 const input = fs
   .readFileSync(filePath, 'utf8')
   .toString()
@@ -8,32 +8,31 @@ const input = fs
   .split('\n')
   .map(Number);
 
-const n = input.shift();
-const solution = (n, input) => {
-  const arr = Array.from({ length: n }, (_, idx) => idx + 1).reverse();
-  const stack = [];
-  const answer = [];
+const totalCount = input.shift();
+const arr = [];
+const answer = [];
 
-  input.forEach((value) => {
-    const idx = stack.indexOf(value);
+let stack_idx = 0;
+input.forEach((num) => {
+  if (arr[arr.length - 1] === num) {
+    arr.pop();
+    answer.push('-');
+  } else {
+    for (let i = stack_idx + 1; i <= num; i++) {
+      arr.push(i);
+      stack_idx += 1;
+      answer.push('+');
+    }
 
-    if (idx === -1) {
-      let popValue = 0;
-      while (arr.length && value !== popValue) {
-        popValue = arr.pop();
-        stack.push(popValue);
-        answer.push('+');
-      }
-      stack.pop();
-      answer.push('-');
-    } else {
-      if (stack[stack.length - 1] !== value) return;
-      stack.pop();
+    if (arr[arr.length - 1] === num) {
+      arr.pop();
       answer.push('-');
     }
-  });
+  }
+});
 
-  return stack.length ? 'NO' : answer.join('\n');
-};
-
-console.log(solution(n, input));
+if (arr.length) {
+  console.log('NO');
+} else {
+  console.log(answer.join('\n'));
+}
