@@ -1,25 +1,22 @@
 const fs = require('fs');
 
-const filePath = process.platform === 'linux' ? '/dev/stdin' : 'input.txt';
-const input = Number(fs.readFileSync(filePath, 'utf8').toString().trim());
+const filePath = process.platform === 'linux' ? '/dev/stdin' : './input.txt';
+const input = fs.readFileSync(filePath, 'utf8').toString().trim();
 
-const dp = (num) => {
-  let memo = Array.from({ length: num + 1 }, () => 0);
-  memo[2] = 1;
-  memo[3] = 1;
+const N = Number(input);
 
-  for (let i = 4; i <= input; i++) {
-    memo[i] = memo[i - 1] + 1;
+const dp = Array(N + 1).fill(0);
 
-    if (i % 3 === 0) {
-      memo[i] = Math.min(memo[i], memo[i / 3] + 1);
-    }
-    if (i % 2 === 0) {
-      memo[i] = Math.min(memo[i], memo[i / 2] + 1);
-    }
+for (let i = 2; i <= N; i++) {
+  dp[i] = dp[i - 1] + 1;
+
+  if (i % 2 === 0) {
+    dp[i] = Math.min(dp[i], dp[i / 2] + 1);
   }
 
-  return memo[input];
-};
+  if (i % 3 === 0) {
+    dp[i] = Math.min(dp[i], dp[i / 3] + 1);
+  }
+}
 
-console.log(dp(input));
+console.log(dp[N]);
